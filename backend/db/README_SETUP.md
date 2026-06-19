@@ -56,6 +56,6 @@ py run.py
 In `backend\.env` use your real postgres password (no spaces around `=`):
 
 ```
-DATABASE_PASSWORD=1991
+DATABASE_PASSWORD=admin
 DATABASE_HOST=localhost
 ```
