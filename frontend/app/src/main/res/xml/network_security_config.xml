@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  HTTP to LAN backends (e.g. Raspberry Pi). Android 9+ blocks cleartext by default.
+  Whitelisting single IPs breaks when the subnet changes (e.g. 10.40.x vs 192.168.x).
+  For production on the public internet, serve HTTPS and tighten this config.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

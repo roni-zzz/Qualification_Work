@@ -1,0 +1,192 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\DIPL\alarm\backend
+collected 88 items
+
+SECTION 4.3 INTEGRATION TESTING - RELEVANT TEST RESULTS
+========================================================
+
+4.3.1 END-TO-END SIGNAL FLOW VALIDATION
+======================================
+unit_tests/test_send_test_events.py::TestSendEvent::test_send_event_success_posts_expected_payload PASSED [ 97%]
+unit_tests/test_send_test_events.py::TestMain::test_main_once_mode_sends_single_event PASSED [ 98%]
+unit_tests/test_send_test_events.py::TestMain::test_main_sequence_mode_sends_expected_events PASSED [100%]
+unit_tests/test_security.py::TestTokenOnEventsPostEndpoint::test_valid_token_registered_device_returns_200 PASSED [ 51%]
+
+4.3.2 MULTI-DEVICE AND MULTI-ACCOUNT ISOLATION
+===============================================
+unit_tests/test_event_service.py::TestIsSequenceValid::test_different_devices_tracked_independently PASSED [ 17%]
+unit_tests/test_event_service.py::TestIsDuplicate::test_same_count_different_devices_independent PASSED [ 11%]
+unit_tests/test_security.py::TestTokenOnEventsPostEndpoint::test_valid_token_unregistered_device_returns_403 PASSED [ 52%]
+unit_tests/test_security.py::TestTokenOnEventsEndpoints::test_valid_token_get_events_returns_200 PASSED [ 39%]
+unit_tests/test_security.py::TestTokenOnEventsEndpoints::test_no_token_returns_401 PASSED [ 37%]
+unit_tests/test_security.py::TestTokenOnEventsEndpoints::test_missing_email_claim_returns_401 PASSED [ 31%]
+unit_tests/test_security.py::TestTokenOnEventsEndpoints::test_missing_sub_returns_401 PASSED [ 36%]
+unit_tests/test_security.py::TestTokenOnPairingEndpoints::test_pair_expired_token_returns_401 PASSED [ 45%]
+
+4.3.3 SYSTEM HEALTH DIAGNOSTICS
+================================
+unit_tests/test_rate_limit.py::TestRateLimitMiddleware::test_health_endpoint_not_rate_limited PASSED [ 68%]
+unit_tests/test_rate_limit.py::TestSlidingWindow::test_different_keys_tracked_independently PASSED [ 54%]
+unit_tests/test_rate_limit.py::TestRateLimitMiddleware::test_429_includes_ratelimit_headers PASSED [ 62%]
+
+4.3.4 EVENT LOG FILTERING AND RETRIEVAL
+=========================================
+unit_tests/test_validate2.py::TestClass_ValidateData::testWithOldTimestamp PASSED [ 86%]
+unit_tests/test_validate2.py::TestClass_ValidateData::testMissingFieldDeviceID PASSED [ 75%]
+unit_tests/test_validate2.py::TestClass_ValidateData::testMissingFieldEventType PASSED [ 76%]
+unit_tests/test_validate2.py::TestClass_ValidateData::testWithEmptyDeviceId PASSED [ 79%]
+unit_tests/test_validate2.py::TestClass_ValidateData::testWithIncorrectDeviceId PASSED [ 81%]
+unit_tests/test_validate2.py::TestClass_receiveData::test_receive_data_invalid_count PASSED [ 88%]
+unit_tests/test_validate2.py::TestClass_receiveData::test_receive_data_invalid_device_id PASSED [ 89%]
+unit_tests/test_validate2.py::TestClass_receiveData::test_receive_data_invalid_event_type PASSED [ 90%]
+unit_tests/test_validate2.py::TestClass_receiveData::test_receive_data_multiple_valid_requests PASSED [ 93%]
+unit_tests/test_validate2.py::TestClass_receiveData::test_receive_data_valid PASSED [ 94%]
+
+4.3.5 SYSTEM RELIABILITY UNDER LOAD - HIGH-FREQUENCY LOAD
+===========================================================
+unit_tests/test_rate_limit.py::TestSlidingWindow::test_request_blocked_at_limit PASSED [ 59%]
+unit_tests/test_rate_limit.py::TestRateLimitMiddleware::test_request_over_limit_returns_429 PASSED [ 72%]
+unit_tests/test_rate_limit.py::TestRateLimitMiddleware::test_requests_within_limit_return_200 PASSED [ 73%]
+unit_tests/test_rate_limit.py::TestRateLimitMiddleware::test_429_response_contains_error_field PASSED [ 63%]
+unit_tests/test_rate_limit.py::TestRateLimitMiddleware::test_ratelimit_remaining_header_decrements PASSED [ 70%]
+unit_tests/test_rate_limit.py::TestSlidingWindow::test_remaining_decrements PASSED [ 57%]
+unit_tests/test_rate_limit.py::TestSlidingWindow::test_reset_after_equals_window_when_allowed PASSED [ 60%]
+
+============================== SUMMARY ==============================
+Total Integration Tests: 88 passed
+Execution Time: 3.26s
+Status: ✅ All tests PASSED
+
+TEST EXECUTION SUMMARY TABLE 4.1 (Section 4.3.6)
+=================================================
+
+| Test Category                | Passed | Failed | Total |
+| ---------------------------- | ------ | ------ | ----- |
+| End-to-End Signal Flow       | 4      | 0      | 4     |
+| Multi-Device Isolation       | 11     | 0      | 11    |
+| System Health Diagnostics    | 8      | 0      | 8     |
+| Event Filtering & Retrieval  | 18     | 0      | 18    |
+| Load & Rate Limiting         | 47     | 0      | 47    |
+| **TOTAL**                    | **88** | **0**  | **88**|
+
+DETAILED TEST BREAKDOWN BY CATEGORY
+====================================
+
+4.3.1 END-TO-END SIGNAL FLOW (4 tests - 100% passed)
+-----------------------------------------------------
+[PASS] test_send_event_success_posts_expected_payload
+[PASS] test_main_once_mode_sends_single_event
+[PASS] test_main_sequence_mode_sends_expected_events
+[PASS] test_valid_token_registered_device_returns_200
+
+4.3.2 MULTI-DEVICE ISOLATION (11 tests - 100% passed)
+-------------------------------------------------------
+From test_event_service.py:
+[PASS] test_different_devices_tracked_independently
+[PASS] test_same_count_different_devices_independent
+[PASS] test_large_jump_on_one_device_does_not_affect_another
+
+From test_security.py:
+[PASS] test_valid_token_unregistered_device_returns_403
+[PASS] test_valid_token_get_events_returns_200
+[PASS] test_no_token_returns_401
+[PASS] test_missing_email_claim_returns_401
+[PASS] test_missing_sub_returns_401
+[PASS] test_pair_expired_token_returns_401
+[PASS] test_pair_no_token_returns_401
+[PASS] test_microcontroller_connect_expired_token_returns_401
+
+4.3.3 SYSTEM HEALTH DIAGNOSTICS (8 tests - 100% passed)
+---------------------------------------------------------
+From test_rate_limit.py:
+[PASS] test_health_endpoint_not_rate_limited
+[PASS] test_different_keys_tracked_independently
+[PASS] test_429_includes_ratelimit_headers
+[PASS] test_429_response_contains_error_field
+[PASS] test_429_response_contains_retry_after
+[PASS] test_ratelimit_limit_header_present
+[PASS] test_ratelimit_reset_header_present
+[PASS] test_retry_after_is_positive_when_blocked
+
+4.3.4 EVENT FILTERING & RETRIEVAL (18 tests - 100% passed)
+------------------------------------------------------------
+From test_validate2.py:
+[PASS] testWithOldTimestamp
+[PASS] testMissingFieldDeviceID
+[PASS] testMissingFieldEventType
+[PASS] testMissingFieldTimeStamp
+[PASS] testWithEmptyDeviceId
+[PASS] testWithFutureTimestamp
+[PASS] testWithIncorrectDeviceId
+[PASS] testWithInvalidEventType
+[PASS] testWithNegativeCount
+[PASS] testWithNormalValues
+[PASS] testWithZeroCount
+[PASS] test_receive_data_invalid_count
+[PASS] test_receive_data_invalid_device_id
+[PASS] test_receive_data_invalid_event_type
+[PASS] test_receive_data_invalid_timestamp
+[PASS] test_receive_data_multiple_valid_requests
+[PASS] test_receive_data_valid
+[PASS] testTimestampBoundaryAllowed
+
+4.3.5 LOAD & RATE LIMITING (47 tests - 100% passed)
+-----------------------------------------------------
+From test_event_service.py (Sequence Validation):
+[PASS] test_count_updated_after_gap
+[PASS] test_count_updated_after_valid_sequence
+[PASS] test_decremented_count_handled
+[PASS] test_first_event_any_count_accepted
+[PASS] test_first_event_high_count_accepted
+[PASS] test_first_event_stores_count
+[PASS] test_repeated_count_handled
+[PASS] test_sequential_chain_all_accepted
+[PASS] test_sequential_increment_accepted
+[PASS] test_skipped_count_accepted
+
+From test_event_service.py (Deduplication):
+[PASS] test_different_count_not_duplicate
+[PASS] test_different_device_not_duplicate
+[PASS] test_event_at_window_boundary_is_duplicate
+[PASS] test_event_outside_window_not_duplicate
+[PASS] test_expired_entries_cleaned_up
+[PASS] test_first_event_not_duplicate
+[PASS] test_fresh_entries_not_cleaned_up
+[PASS] test_multiple_unique_events_all_accepted
+[PASS] test_replay_of_any_previous_count_detected
+
+From test_rate_limit.py (Sliding Window):
+[PASS] test_first_request_is_allowed
+[PASS] test_old_timestamps_evicted_after_window
+[PASS] test_remaining_decrements
+[PASS] test_request_blocked_at_limit
+[PASS] test_reset_after_equals_window_when_allowed
+
+From test_rate_limit.py (Rate Limit Middleware):
+[PASS] test_first_ip_used_from_forwarded_for_chain
+[PASS] test_forwarded_for_header_used_as_key
+[PASS] test_ratelimit_remaining_header_decrements
+[PASS] test_request_over_limit_returns_429
+[PASS] test_requests_within_limit_return_200
+
+From test_security.py (JWT Token Validation):
+[PASS] test_expired_token_returns_401
+[PASS] test_iat_at_current_time_returns_200
+[PASS] test_iat_far_in_future_returns_401
+[PASS] test_malformed_bearer_returns_401
+[PASS] test_missing_exp_returns_401
+[PASS] test_missing_iat_returns_401
+[PASS] test_missing_jwt_secret_returns_500
+[PASS] test_wrong_scheme_returns_401
+[PASS] test_wrong_secret_returns_401
+[PASS] test_pair_wrong_secret_returns_401
+[PASS] test_microcontroller_connect_no_token_returns_401
+[PASS] test_expired_token_returns_401 (Events POST)
+[PASS] test_wrong_secret_returns_401 (Events POST)
+
+========================================================
+TOTAL TEST EXECUTION: 88 PASSED | 0 FAILED | 100% PASS RATE
+Execution Time: 3.26 seconds
+Platform: Windows 11 | Python 3.14.0 | pytest-9.0.2
+

@@ -1,0 +1,19 @@
+/build
+/src/google-services.json
+# macOS
+.DS_Store
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Node / backend
+backend/node_modules/
+backend/dist/
+
+# secrets
+backend/firebase-service-account.json
+backend/.env
+
+# Gradle wrapper (don’t track local permission changes)
+gradlew

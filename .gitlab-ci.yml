@@ -1,0 +1,261 @@
+stages:
+  - validate
+  - build
+  - release
+
+default:
+  tags:
+    - sweng24-docker
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_BUILDKIT: "1"
+  BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend
+  FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend
+  MICROCONTROLLER_IMAGE: $CI_REGISTRY_IMAGE/microcontroller
+
+# Backend validation using Docker container
+backend-syntax:
+  stage: validate
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+      command: ["--tls=false", "--dns", "192.168.65.7"]
+  script:
+    - cd backend
+    - docker build -t backend-test -f Dockerfile --target builder .
+    - docker run --rm backend-test python -m compileall -q app run.py
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Lint for code quality using Docker
+backend-lint:
+  stage: validate
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+      command: ["--tls=false", "--dns", "192.168.65.7"]
+  script:
+    - cd backend
+    - docker build -t backend-test -f Dockerfile --target builder .
+    - docker run --rm backend-test sh -c "pip install flake8 && flake8 app/ --max-line-length=120 --exclude=__pycache__,*.pyc --exit-zero"
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Backend tests using Docker container
+backend-test:
+  stage: validate
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+      command: ["--tls=false", "--dns", "192.168.65.7"]
+  script:
+    - cd backend
+    - docker build -t backend-test -f Dockerfile --target builder .
+    - docker run --rm backend-test sh -c "pip install pytest pytest-cov httpx && pytest unit_tests/ -v"
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Microcontroller validation using Docker container
+microcontroller-syntax:
+  stage: validate
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+      command: ["--tls=false", "--dns", "192.168.65.7"]
+  script:
+    - cd microcontroller
+    - docker build -t microcontroller-test .
+    - docker run --rm microcontroller-test
+  only:
+    - merge_requests
+    - main
+
+# Frontend validation — Kotlin syntax check via ktlint (avoids full Android SDK download)
+frontend-validate:
+  stage: validate
+  image: eclipse-temurin:17-jdk-jammy
+  script:
+    - apt-get update -qq && apt-get install -y -qq curl
+    - curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.3.1/ktlint && chmod +x ktlint
+    - cd frontend
+    - |
+      if ! find app/src -name "*.kt" -print0 | xargs -0 -r ../ktlint --format; then
+        echo "ktlint --format found non-auto-correctable issues. Continuing."
+      fi
+    - |
+      if ! find app/src -name "*.kt" -print0 | xargs -0 -r ../ktlint --reporter=plain; then
+        echo "ktlint found non-auto-correctable issues. Keeping job non-blocking for now."
+      fi
+  only:
+    - merge_requests
+    - main
+
+# Build Docker image
+build-backend:
+  stage: build
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+      command: ["--tls=false", "--dns", "192.168.65.7"]
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker buildx create --use
+  script:
+    - cd backend
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        docker buildx build --platform linux/amd64\
+          -t $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA \
+          -t $BACKEND_IMAGE:latest \
+          --push .
+      else
+        docker buildx build --platform linux/amd64 \
+          -t $BACKEND_IMAGE:pre-main-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA \
+          --push .
+      fi
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH'
+      when: manual
+
+# Build frontend Docker image
+build-frontend:
+  stage: build
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+      command: ["--tls=false", "--dns", "192.168.65.7"]
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker buildx create --use
+  script:
+    - cd frontend
+    - |
+      set -e
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        TAG_ARGS="-t $FRONTEND_IMAGE:$CI_COMMIT_SHORT_SHA -t $FRONTEND_IMAGE:latest"
+      else
+        TAG_ARGS="-t $FRONTEND_IMAGE:pre-main-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA"
+      fi
+
+      ATTEMPT=1
+      MAX_ATTEMPTS=3
+      until [ "$ATTEMPT" -gt "$MAX_ATTEMPTS" ]; do
+        echo "Frontend image push attempt $ATTEMPT/$MAX_ATTEMPTS"
+        if docker buildx build --platform linux/amd64 $TAG_ARGS --push .; then
+          break
+        fi
+
+        if [ "$ATTEMPT" -eq "$MAX_ATTEMPTS" ]; then
+          echo "Frontend image push failed after $MAX_ATTEMPTS attempts"
+          exit 1
+        fi
+
+        SLEEP_SECONDS=$((ATTEMPT * 10))
+        echo "Push failed, retrying in ${SLEEP_SECONDS}s..."
+        sleep "$SLEEP_SECONDS"
+        ATTEMPT=$((ATTEMPT + 1))
+      done
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH'
+      when: manual
+
+# Build microcontroller Docker image
+build-microcontroller:
+  stage: build
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+      command: ["--tls=false", "--dns", "192.168.65.7"]
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker buildx create --use
+  script:
+    - cd microcontroller
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        docker buildx build --platform linux/amd64 \
+          -t $MICROCONTROLLER_IMAGE:$CI_COMMIT_SHORT_SHA \
+          -t $MICROCONTROLLER_IMAGE:latest \
+          --push .
+      else
+        docker buildx build --platform linux/amd64 \
+          -t $MICROCONTROLLER_IMAGE:pre-main-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA \
+          --push .
+      fi
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH'
+      when: manual
+
+# Automated version bump + tag
+release-auto:
+  stage: release
+  image: alpine:3.20
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+  script: |
+    set -e
+    apk add --no-cache git
+    git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+    git fetch --tags origin
+
+    LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 || true)
+    if [ -n "$LATEST_TAG" ]; then
+      VERSION="${LATEST_TAG#v}"
+    else
+      VERSION="1.0.0"
+    fi
+
+    echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || {
+      echo "Invalid version format from latest tag: ${VERSION}"
+      exit 1
+    }
+
+    MAJOR=$(echo "$VERSION" | cut -d. -f1)
+    MINOR=$(echo "$VERSION" | cut -d. -f2)
+    PATCH=$(echo "$VERSION" | cut -d. -f3)
+
+    COMMIT_MSG=$(git log -1 --pretty=%B "$CI_COMMIT_SHA")
+    if echo "$COMMIT_MSG" | grep -q "BREAKING CHANGE"; then
+      MAJOR=$((MAJOR + 1))
+      MINOR=0
+      PATCH=0
+    elif echo "$COMMIT_MSG" | grep -q "!:"; then
+      MAJOR=$((MAJOR + 1))
+      MINOR=0
+      PATCH=0
+    elif echo "$COMMIT_MSG" | grep -q "^feat"; then
+      MINOR=$((MINOR + 1))
+      PATCH=0
+    else
+      PATCH=$((PATCH + 1))
+    fi
+
+    NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+    TAG="v${NEW_VERSION}"
+    echo "Current version: $VERSION -> New version: $NEW_VERSION (tag: $TAG)"
+    git tag "$TAG" "$CI_COMMIT_SHA"
+    git push "https://oauth2:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "$TAG"

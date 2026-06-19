@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Guidewire SafeWarehouse – green & sustainability -->
+    <color name="forest_green">#FF2D5A3D</color>
+    <color name="forest_green_dark">#FF1E3D2A</color>
+    <color name="sage_green">#FF8FBC8F</color>
+    <color name="sage_green_dark">#FF6B9B6B</color>
+    <color name="leaf_light">#FFC8E6C9</color>
+    <color name="earth_brown">#FF8D6E63</color>
+    <color name="earth_brown_light">#FFBCAAA4</color>
+    <color name="cream_background">#FFF1F8E9</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

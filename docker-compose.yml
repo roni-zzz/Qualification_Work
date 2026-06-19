@@ -1,0 +1,53 @@
+# Run from repo root: docker compose up -d
+# Requires backend/.env (copy from backend/.env.example).
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: alarm-backend
+    ports:
+      - "8000:8000"
+    # Do not set GOOGLE_CLIENT_ID or JWT_SECRET here — empty ${VAR:-} overrides env_file and
+    # wipes values from backend/.env. Secrets stay in backend/.env only.
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD:-pass}
+      - PORT=8000
+      - HOST=0.0.0.0
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - alarm-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    container_name: alarm-db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-pass}
+      - POSTGRES_DB=${POSTGRES_DB:-alarm_system}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/db/workflow.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - alarm-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  alarm-network:
+    driver: bridge

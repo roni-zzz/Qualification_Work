@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "104634170174",
+    "project_id": "warehouse-alarm-system",
+    "storage_bucket": "warehouse-alarm-system.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104634170174:android:967a477630a4d764fe8a6f",
+        "android_client_info": {
+          "package_name": "com.example.guidewirehomesecurityapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "104634170174-cbet267782fjnpnmk0ogu8fsvs1h6gon.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.guidewirehomesecurityapp",
+            "certificate_hash": "30d02279ac0a756a520bb95880bc1acfb8a05455"
+          }
+        },
+        {
+          "client_id": "104634170174-76r5jpn1oh1dgc8anoi4ip6182strm6i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBph7ENKOP3gU8u5veTf1oBfoJ7UNKY0Io"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "104634170174-76r5jpn1oh1dgc8anoi4ip6182strm6i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

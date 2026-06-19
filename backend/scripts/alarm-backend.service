@@ -1,0 +1,17 @@
+[Unit]
+Description=Alarm Backend FastAPI
+After=network-online.target postgresql.service
+Wants=network-online.target postgresql.service
+
+[Service]
+Type=simple
+User=admin
+Group=admin
+WorkingDirectory=/home/admin/alarm/backend
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/admin/alarm/.venv/bin/python /home/admin/alarm/backend/run.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

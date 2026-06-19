@@ -1,0 +1,6 @@
+{
+  "micropython.device": "COM3",
+  "micropython.syncFolder": "microcontroller/src",
+  "micropython.buildBeforeUpload": false,
+  "micropython.board": "ESP32"
+}

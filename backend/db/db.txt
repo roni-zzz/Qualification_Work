@@ -1,0 +1,41 @@
+DataBase methods documentation
+
+#1 - connectToDB()
+Connects to database
+takes no arguments
+returns: connection
+
+#2 getCurrentAlarmSystemID()
+Gets id of alarm system that corresponds to username
+takes one argument: username 
+returns: alarm system id
+
+#3 connectUserToSystem()
+Checks if user is connected to an alarm system, if no creates alarmsystem object which is assigned to the user
+takes one argument: username
+returns: nothing
+
+#4 connectMicroController()
+Assigns microcontroller to the alarm system
+Takes two arguments: micro-controller id, username
+returns: true if connected | false if didnt conenct
+
+#5 generate_random_password()
+Generates random password of length n, by default 16 
+takes one argument: length of password
+returns: random password
+
+#6 create_alarm_system()
+Creates instance of alarm system with id and random password, armed mode and paired are set to false
+takes one argument: cursor of the connection
+returns: tuple with system id and password
+
+#7 getModeBySysId()
+Finds the state of alarm mode for corresponding alarm system 
+takes one argument: system id
+returns: true if system is armed | false if not
+
+#7.1 getModeByUsername()
+Does the same thing as 7, but using username
+takes one argument: username
+returns: true if system is armed | false if not
